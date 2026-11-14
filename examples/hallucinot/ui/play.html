@@ -1,0 +1,85 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catch the facts</title>
+<style>
+:root{--bg:#0a0b0d;--card:#14161a;--line:#2a2e34;--ink:#ececf1;--muted:#9aa0a8;--g:#5fd18f;--r:#ff7676;--a:#a28cff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:18px 16px}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+h1{margin:0;font-size:24px}.sub{color:var(--muted);font-size:14px}
+header a{margin-left:auto;color:var(--muted);font-size:14px}
+.hud{display:flex;gap:16px;flex-wrap:wrap;margin:12px 0 8px;font-size:14px}.hud b{font-variant-numeric:tabular-nums}
+canvas{width:100%;height:auto;background:#0d0f12;border:1px solid var(--line);border-radius:14px;display:block;touch-action:none}
+.toast{min-height:48px;margin-top:10px;padding:10px 14px;border-radius:10px;background:var(--card);border:1px solid var(--line);font-size:14px}
+.toast.ok{border-color:var(--g)}.toast.bad{border-color:var(--r)}
+.toast .src{color:var(--muted);font-size:12px;margin-top:3px}
+button{border:0;border-radius:999px;padding:8px 16px;background:#5b3fd6;color:#fff;font-weight:600;cursor:pointer;font-size:14px}
+.foot{color:var(--muted);font-size:12px;margin-top:10px}
+</style></head><body>
+<div class="wrap">
+  <header><div style="font-size:30px">🦖</div><div><h1>Catch the facts</h1><div class="sub">Real statements fall. <b>Drex</b> decides live which are true and which are hallucinations. Catch only the true ones.</div></div><a href="/">← Hallucinot</a></header>
+  <div class="hud"><span>✅ <b id="score">0</b> facts</span><span>❤️ <b id="lives">3</b></span><span>🏆 best <b id="best">0</b></span><span>⚡ Drex <b id="ms">–</b> avg per verdict</span><span>🎯 Drex vs answer key <b id="key">–</b></span><button id="restart" type="button" style="margin-left:auto">Restart</button></div>
+  <canvas id="c" width="900" height="460"></canvas>
+  <div class="toast" id="toast">Move with ← → or the mouse. Statements come from the knowledge base; some have a number changed. Drex judges each one against its source.</div>
+  <div class="foot">Every verdict is a real Drex call made when the round loads. Missing a true statement costs nothing; catching a hallucination costs a life.</div>
+</div>
+<script>window.HN_PLAY = true;</script><script src="/offline.js"></script>
+<script>
+const c = document.getElementById('c'), ctx = c.getContext('2d'), W = c.width, H = c.height;
+const $ = id => document.getElementById(id);
+let queue = [], falling = [], score = 0, lives = 3, x = 0.5, t = 0, spawnEvery = 150, running = true, loading = false, msAll = [], keyText = '–';
+let best = 0; try { best = +localStorage.getItem('hn-drex-best') || 0; } catch (_) {}
+const keys = {}; addEventListener('keydown', e => { keys[e.key] = true; if (['ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault(); }); addEventListener('keyup', e => keys[e.key] = false);
+const move = e => { const r = c.getBoundingClientRect(); const cx = e.touches ? e.touches[0].clientX : e.clientX; x = Math.min(0.93, Math.max(0.07, (cx - r.left) / r.width)); };
+c.addEventListener('mousemove', move); c.addEventListener('touchmove', e => { move(e); e.preventDefault(); }, {passive:false});
+
+async function loadRound(){
+  if (loading) return; loading = true;
+  try {
+    const r = await fetch('/api/game/round', {cache:'no-store'}).then(r => { if (!r.ok) throw 0; return r.json(); });
+    if (r.error || !r.items) throw 0;
+    queue.push(...r.items.sort(() => Math.random() - .5)); r.items.forEach(i => msAll.push(i.ms)); keyText = r.drex_agrees_with_answer_key;
+    $('ms').textContent = Math.round(msAll.reduce((a,b)=>a+b,0)/msAll.length) + ' ms'; $('key').textContent = keyText;
+  } catch (_) { running = false; hnOfflineGame.show(); }   // offline / server down: simple icon version
+  loading = false;
+}
+function wrap(text, maxW){ ctx.font = '600 15px -apple-system,sans-serif'; const words = text.split(' '), lines = []; let line = '';
+  for (const w of words) { const test = line ? line + ' ' + w : w; if (ctx.measureText(test).width > maxW && line) { lines.push(line); line = w; } else line = test; }
+  if (line) lines.push(line); return lines.slice(0, 4); }
+function toast(html, cls){ const el = $('toast'); el.className = 'toast ' + cls; el.innerHTML = html; }
+function spawn(){ const it = queue.shift(); if (!it) return; const lines = wrap(it.text, 250); falling.push({...it, lines, w: 280, h: 18 + lines.length * 20, px: 0.15 + Math.random() * 0.7, y: -90}); }
+function reset(){ score = 0; lives = 3; falling = []; t = 0; spawnEvery = 150; running = true; $('score').textContent = 0; $('lives').textContent = 3; if (queue.length < 6) loadRound(); }
+$('restart').addEventListener('click', reset);
+function frame(){
+  if (running && lives > 0) {
+    if (keys.ArrowLeft || keys.a) x = Math.max(0.07, x - 0.015); if (keys.ArrowRight || keys.d) x = Math.min(0.93, x + 0.015);
+    t++; if (t % spawnEvery === 0 || (falling.length === 0 && queue.length)) { spawn(); spawnEvery = Math.max(95, spawnEvery - 3); }
+    if (queue.length < 4) loadRound();
+    const bx = x * W, by = H - 40, bw = 150, sp = 0.8 + score * 0.04;
+    for (const f of falling) f.y += sp;
+    falling = falling.filter(f => {
+      const fx = f.px * W;
+      if (f.y + f.h > by - 6 && f.y + f.h < by + 14 && Math.abs(fx - bx) < (f.w / 2 + bw / 2) * 0.6) {
+        if (f.true) { score++; $('score').textContent = score; toast(`✅ <b>Fact.</b> Drex: true · ${f.ms} ms · ${Math.round(f.conf*100)}% sure<div class="src">${f.source}</div>`, 'ok'); }
+        else { lives--; $('lives').textContent = lives; toast(`🦖 <b>Hallucination!</b> Drex caught it in ${f.ms} ms. The source says: “${f.source_line}”<div class="src">${f.source}</div>`, 'bad'); }
+        if (score > best) { best = score; try { localStorage.setItem('hn-drex-best', best); } catch(_){} }
+        return false;
+      }
+      return f.y < H + 10;
+    });
+  }
+  // draw
+  ctx.clearRect(0, 0, W, H);
+  for (const f of falling) { const fx = f.px * W - f.w / 2;
+    ctx.fillStyle = '#1b1e24'; ctx.strokeStyle = '#343a42'; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(fx, f.y, f.w, f.h, 10); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#ececf1'; ctx.font = '600 15px -apple-system,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    f.lines.forEach((l, i) => ctx.fillText(l, fx + 14, f.y + 10 + i * 20)); }
+  const bx = x * W; ctx.fillStyle = '#5b3fd6'; ctx.beginPath(); ctx.roundRect(bx - 75, H - 30, 150, 12, 6); ctx.fill();
+  ctx.font = '34px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🦖', bx, H - 52);
+  if (lives <= 0) { ctx.fillStyle = 'rgba(10,11,13,.75)'; ctx.fillRect(0, 0, W, H); ctx.fillStyle = '#ececf1'; ctx.font = '700 30px -apple-system,sans-serif'; ctx.fillText(`Too many hallucinations! ${score} facts caught`, W/2, H/2 - 10);
+    ctx.font = '16px -apple-system,sans-serif'; ctx.fillStyle = '#9aa0a8'; ctx.fillText('Press Restart to play again', W/2, H/2 + 24); }
+  if (!queue.length && !falling.length && loading) { ctx.fillStyle = '#9aa0a8'; ctx.font = '16px -apple-system,sans-serif'; ctx.fillText('Drex is judging the next round…', W/2, H/2); }
+  $('best').textContent = best;
+  requestAnimationFrame(frame);
+}
+loadRound(); frame();
+</script></body></html>

@@ -1,0 +1,37 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+@page{size:1600px 900px;margin:0}
+html,body{margin:0;background:#0a0b0d}body{zoom:1.25}
+.s{width:1280px;height:720px;position:relative;overflow:hidden;
+   background:radial-gradient(ellipse 620px 360px at 1000px 70px, rgba(46,120,80,.28), transparent 70%),
+              radial-gradient(ellipse 400px 300px at 40px 700px, rgba(46,120,80,.10), transparent 70%), #0a0b0d;
+   font-family:"Space Grotesk",-apple-system,Helvetica,Arial,sans-serif;color:#f2f3f5}
+.frame{position:absolute;inset:18px 20px;border:1px solid #1b1e22;border-radius:22px}
+.lbl{position:absolute;left:78px;top:62px;font-family:"Space Mono",ui-monospace,Menlo,monospace;font-size:16px;letter-spacing:4px;color:#7ee2b0}
+.lbl:before{content:"";display:inline-block;width:22px;height:1px;background:#2e6b4f;vertical-align:middle;margin-right:10px}
+h1{position:absolute;left:78px;top:92px;margin:0;font-size:52px;font-weight:700;letter-spacing:-.5px}
+.grid{position:absolute;left:78px;top:196px;width:1000px;display:flex;flex-wrap:wrap;gap:14px}
+.p{display:flex;align-items:center;background:#121418;border:1px solid #1f2328;border-left:2px solid var(--c);border-radius:10px;padding:18px 24px}
+.p b{font-size:21px;font-weight:700;display:flex;align-items:center;gap:12px}
+.p b:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c)}
+.p span{font-size:15px;color:#9aa0a8;margin:6px 0 0 20px;font-weight:500}
+.mascot{position:absolute;right:100px;bottom:18px;width:176px;height:135px;background:url(_page9.png) no-repeat -1000px -575px;-webkit-mask-image:radial-gradient(ellipse 50% 55% at 50% 50%, #000 70%, transparent 100%);mask-image:radial-gradient(ellipse 50% 55% at 50% 50%, #000 70%, transparent 100%)}
+.logo{position:absolute;left:40px;bottom:28px;width:120px;height:22px;background:url(_page9.png) no-repeat -40px -670px}
+.num{position:absolute;right:44px;bottom:31px;font-family:"Space Mono",ui-monospace,monospace;font-size:13px;color:#5e646c;letter-spacing:1px}
+</style></head><body><div class="s">
+<div class="frame"></div>
+<div class="lbl">SCENE EIGHT · UNDER THE HOOD</div>
+<h1>Built in a day, with:</h1>
+<div class="grid">
+  <div class="p" style="--c:#7ee2b0"><b>Nace Drex</b></div>
+  <div class="p" style="--c:#7ee2b0"><b>NDI · Nace Document Intelligence</b></div>
+  <div class="p" style="--c:#7ee2b0"><b>Intern</b></div>
+  <div class="p" style="--c:#7cc8e8"><b>DeepInfra · Llama 3.3 70B</b></div>
+  <div class="p" style="--c:#7cc8e8"><b>Adobe Express &amp; Firefly</b></div>
+  <div class="p" style="--c:#f2b55a"><b>Chrome Extension</b></div>
+</div>
+<div class="mascot"></div>
+<div class="logo"></div>
+<div class="num">09 / 10</div>
+</div></body></html>

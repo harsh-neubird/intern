@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: hallucinot
+    runtime: python
+    plan: free
+    buildCommand: "echo no build step"
+    startCommand: "python3 server.py --host 0.0.0.0"
+    envVars:
+      - key: NACE_API_KEY
+        sync: false

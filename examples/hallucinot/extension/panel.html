@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html,body{margin:0;height:100%;background:#f6f5f2;font:13px -apple-system,BlinkMacSystemFont,sans-serif}
+  @media (prefers-color-scheme: dark){html,body{background:#121216;color:#ececf1}}
+  .bar{display:flex;gap:8px;align-items:center;padding:8px 10px;border-bottom:1px solid rgba(128,128,128,.25)}
+  button{border:0;border-radius:999px;padding:6px 12px;font-weight:600;cursor:pointer;background:#5b3fd6;color:#fff}
+  #st{color:#888;font-size:12px}
+  iframe{border:0;width:100%;height:calc(100% - 44px);display:block}
+</style>
+</head>
+<body>
+  <div class="bar"><button id="now">Check this page</button><span id="st">Watching your tabs…</span></div>
+  <iframe id="app" src="http://localhost:8787/?panel" allow="microphone"></iframe>
+  <script src="panel.js"></script>
+</body>
+</html>
